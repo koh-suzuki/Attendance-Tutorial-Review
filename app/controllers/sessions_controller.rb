@@ -13,7 +13,9 @@ class SessionsController < ApplicationController
     end
   end
   
-  def logged_in?
-    !current_user.nil?
+  def destroy
+    log_out
+    flash[:success] = 'ログアウトしました。'
+    redirect_to root_url
   end
 end
