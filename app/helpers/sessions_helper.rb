@@ -11,6 +11,13 @@ module SessionsHelper
     cookies.permanent.signed[:user_id] = user.id
     cookies.permanent[:remember_token] = user.remember_token
   end
+  
+  # 永続的セッションを破棄します
+  def forget(user)
+    user.forget
+    cookies.delete(:user_id)
+    cookies.delete(:remember_token)
+  end
 
   # 一時的セッションにいるユーザーを返します。
   # それ以外の場合はcookiesに対応するユーザーを返します。
@@ -19,7 +26,7 @@ module SessionsHelper
       @current_user ||= User.find_by(id: user_id)
     elsif (user_id = cookies.signed[:user_id])
         user = User.find_by(id: user_id)
-        if user && user.authenticate?(cookies[:remember_token])
+        if user && user.authenticated?(cookies[:remember_token])
           log_in user
           @current_user = user
         end
@@ -28,6 +35,7 @@ module SessionsHelper
 
   # セッションと@current_userを破棄します
   def log_out
+    forget(current_user)
     session.delete(:user_id)
     @current_user = nil
   end
